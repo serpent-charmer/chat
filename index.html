@@ -1,0 +1,94 @@
+<html>
+<head>
+	<style>
+		body {
+			margin: 0;
+		}
+	</style>
+</head>
+<video hidden autoplay id="vid" >
+</video>
+
+<canvas  id="canv">
+</canvas>
+
+<img id="result"/>
+
+<script>
+
+let canvas = document.getElementById("canv");
+let video = document.getElementById("vid");
+let result = document.getElementById("result");
+
+(async function() {
+
+	try { 
+		
+		video.setAttribute("width", window.outerWidth);
+		video.setAttribute("height", window.outerHeight);
+		
+					
+		const dctx = canvas.getContext("2d");
+		
+		canvas.addEventListener("pointermove", function(e) {
+			const coalescedEvents = e.getCoalescedEvents();
+			for (let coalescedEvent of coalescedEvents) {
+				console.log(coalescedEvent);
+				let { pageX: x, pageY: y, pressure: p } = coalescedEvent;
+				if(p > 0) {
+					dctx.lineTo(x, y);
+					dctx.stroke();
+				} else {
+					dctx.beginPath();
+				}
+			}
+			
+		});
+		
+		document.addEventListener("keypress", async function(e) {
+			
+			let { videoWidth: vw, videoHeight: vh } = video;
+			console.log(vw, vh);
+			
+			switch(e.key)
+			{
+			case "s": {
+				result.setAttribute("width", vw);
+				result.setAttribute("height", vh);
+				let data = canvas.toDataURL();
+				result.setAttribute("src", data);
+				break;
+			}
+			case "n": {
+				
+				video.srcObject = 
+					await navigator.mediaDevices.getDisplayMedia();
+				
+				dctx.beginPath();
+				break;
+			}
+			default: {
+				canvas.setAttribute("width", vw);
+				canvas.setAttribute("height", vh);
+				const ctx = canvas.getContext("2d");
+				ctx.drawImage(video, 0, 0);
+			}
+			}
+			
+		});
+		
+		
+		
+	} catch(e) {
+		console.log(e);
+	}
+	
+	
+
+}())
+
+
+
+</script>
+
+</html>
